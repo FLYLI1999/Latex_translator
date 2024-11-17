@@ -21,7 +21,10 @@ export default {
       success: 'Language switched successfully',
       error: 'Failed to switch language',
       confirm: 'Changing language may affect current content, continue?'
-    }
+    },
+    select: 'Select',
+    edit: 'Edit',
+    delete: 'Delete'
   },
   settings: {
     provider: {

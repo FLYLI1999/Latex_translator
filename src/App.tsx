@@ -20,7 +20,7 @@ function App() {
 
   return (
     <I18nextProvider i18n={i18n}>
-      <div className={`min-h-screen ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+      <div className={`min-h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500 ${darkMode ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
         <ToastContainer
           position="top-right"
           theme={darkMode ? 'dark' : 'light'}

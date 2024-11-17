@@ -234,7 +234,7 @@ const PromptTab: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0">
+      <div className="flex-1 overflow-y-auto min-h-0 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max">
           {filteredTemplates
             .sort((a, b) => {
@@ -269,7 +269,7 @@ const PromptTab: React.FC = () => {
               </h3>
             </div>
 
-            <div className="px-6 py-4 overflow-y-auto max-h-[calc(85vh-10rem)]">
+            <div className="px-6 py-4 overflow-y-auto max-h-[calc(85vh-10rem)] scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
               <div className="space-y-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">

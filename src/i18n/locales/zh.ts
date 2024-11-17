@@ -22,6 +22,9 @@ export default {
       error: '语言切换失败',
       confirm: '切换语言可能会影响当前编辑的内容，是否继续？'
     },
+    select: '选择',
+    edit: '编辑',
+    delete: '删除',
   },
   settings: {
     provider: {

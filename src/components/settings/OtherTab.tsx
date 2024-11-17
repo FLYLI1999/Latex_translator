@@ -51,12 +51,14 @@ const OtherTab: React.FC = () => {
             </label>
             <button
               onClick={() => handleChange('renderLatex', !settings.renderLatex)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                settings.renderLatex ? 'bg-indigo-600' : 'bg-gray-200'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
+                settings.renderLatex 
+                  ? 'bg-indigo-600 dark:bg-indigo-500' 
+                  : 'bg-gray-200 dark:bg-gray-600'
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:bg-gray-200 ${
                   settings.renderLatex ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
@@ -78,12 +80,14 @@ const OtherTab: React.FC = () => {
             </label>
             <button
               onClick={() => handleChange('autoTranslate', !settings.autoTranslate)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 ${
-                settings.autoTranslate ? 'bg-indigo-600' : 'bg-gray-200'
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
+                settings.autoTranslate 
+                  ? 'bg-indigo-600 dark:bg-indigo-500' 
+                  : 'bg-gray-200 dark:bg-gray-600'
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:bg-gray-200 ${
                   settings.autoTranslate ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />

@@ -20,6 +20,9 @@ export interface TranslationKeys {
       success: string;
       error: string;
     };
+    select: string;
+    edit: string;
+    delete: string;
   };
   settings: {
     provider: Record<string, string>;
