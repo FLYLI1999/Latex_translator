@@ -20,8 +20,8 @@ const SettingsDialog: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
-        <div className="flex items-center justify-between border-b pb-4">
+      <div className="w-full max-w-2xl h-[90vh] rounded-lg bg-white shadow-xl dark:bg-gray-800 flex flex-col">
+        <div className="flex-shrink-0 flex items-center justify-between border-b p-6 pb-4">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {t('common.settings')}
           </h2>
@@ -33,8 +33,8 @@ const SettingsDialog: React.FC = () => {
           </button>
         </div>
 
-        <div className="mt-4">
-          <div className="border-b">
+        <div className="flex-1 flex flex-col min-h-0">
+          <div className="flex-shrink-0 border-b px-6">
             <nav className="-mb-px flex space-x-8">
               {tabs.map((tab) => (
                 <button
@@ -52,7 +52,7 @@ const SettingsDialog: React.FC = () => {
             </nav>
           </div>
 
-          <div className="mt-4">
+          <div className="flex-1 overflow-hidden p-6">
             {settingsState.activeTab === 'provider' && <ProviderTab />}
             {settingsState.activeTab === 'prompt' && <PromptTab />}
             {settingsState.activeTab === 'other' && <OtherTab />}

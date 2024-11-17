@@ -1,16 +1,15 @@
 import { create } from 'zustand';
 import { translateText } from './services/api';
 import { toast } from 'react-toastify';
-import { LLMProvider, TranslationSettings, SettingsState } from './types';
+import { LLMProvider, TranslationSettings, SettingsState, PromptTemplate } from './types';
 import i18n from './i18n/config';
 
-// 固定的系统提示词，不需要国际化
+// Default system prompt
 const DEFAULT_SYSTEM_PROMPT = `You are a LaTeX document translator. Translate the following LaTeX content from {sourceLang} to {targetLang}.
 Preserve all LaTeX commands and structure. Only translate the actual text content.
 Maintain the exact same formatting, spacing, and LaTeX syntax.
 If you find any syntax errors in the original LaTeX content, please point them out and suggest corrections, but do not modify them during translation.`;
 
-// 创建一个获取翻译函数的辅助函数
 const getT = () => i18n.t.bind(i18n);
 
 const defaultProvider: LLMProvider = {
@@ -22,7 +21,7 @@ const defaultProvider: LLMProvider = {
 
 const defaultSettings: TranslationSettings = {
   maxConcurrentRequests: 5,
-  systemPrompt: DEFAULT_SYSTEM_PROMPT, // 使用固定的系统提示词
+  systemPrompt: DEFAULT_SYSTEM_PROMPT,
   provider: defaultProvider,
   renderLatex: false,
   autoTranslate: false,
@@ -33,6 +32,8 @@ const defaultSettings: TranslationSettings = {
   temperature: 0.3,
   defaultApiUrl: 'https://api.openai.com/v1',
   downloadFilePrefix: 'translated_',
+  templates: [],
+  selectedTemplateId: 'default',
 };
 
 interface Store {
@@ -205,7 +206,7 @@ const useStore = create<Store>((set, get) => ({
       toast.error(t('errors.saveFailed'));
       return;
     }
-    // 实现保存功能
+    // Implement save functionality
   },
 
   copyToClipboard: () => {
