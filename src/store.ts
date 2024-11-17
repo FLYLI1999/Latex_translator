@@ -66,6 +66,8 @@ interface Store {
     isChangingLanguage: boolean;
   };
   setLanguage: (lang: string) => Promise<void>;
+  translationProgress: number;
+  setTranslationProgress: (progress: number) => void;
 }
 
 const useStore = create<Store>((set, get) => ({
@@ -104,7 +106,7 @@ const useStore = create<Store>((set, get) => ({
       return;
     }
 
-    set({ isTranslating: true });
+    set({ isTranslating: true, translationProgress: 0 });
 
     try {
       const lines = sourceText.split('\n').filter(line => line.trim());
@@ -121,28 +123,29 @@ const useStore = create<Store>((set, get) => ({
       }
       if (currentChunk) chunks.push(currentChunk);
 
-      const results = await Promise.all(
-        chunks.map(async (chunk, index) => {
-          if (index >= settings.maxConcurrentRequests) {
-            await new Promise(resolve => 
-              setTimeout(resolve, Math.floor(index / settings.maxConcurrentRequests) * settings.delayBetweenChunks)
-            );
-          }
-          return translateText({
-            text: chunk,
-            sourceLang,
-            targetLang,
-            settings,
-          });
-        })
-      );
+      const results: string[] = [];
+      for (let i = 0; i < chunks.length; i++) {
+        if (i >= settings.maxConcurrentRequests) {
+          await new Promise(resolve => 
+            setTimeout(resolve, Math.floor(i / settings.maxConcurrentRequests) * settings.delayBetweenChunks)
+          );
+        }
+        const result = await translateText({
+          text: chunks[i],
+          sourceLang,
+          targetLang,
+          settings,
+        });
+        results.push(result);
+        set({ translationProgress: Math.round(((i + 1) / chunks.length) * 100) });
+      }
 
       set({ translatedText: results.join('\n') });
       toast.success(t('success.translateSuccess'));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('errors.translateFailed'));
     } finally {
-      set({ isTranslating: false });
+      set({ isTranslating: false, translationProgress: 0 });
     }
   },
 
@@ -240,6 +243,9 @@ const useStore = create<Store>((set, get) => ({
       throw error;
     }
   },
+
+  translationProgress: 0,
+  setTranslationProgress: (progress: number) => set({ translationProgress: progress }),
 }));
 
 export default useStore;

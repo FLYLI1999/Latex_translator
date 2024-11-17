@@ -18,6 +18,17 @@ const OtherTab: React.FC = () => {
     });
   };
 
+  const languageOptions = [
+    { value: 'en', label: t('common.english') },
+    { value: 'zh', label: t('common.chinese') },
+    { value: 'ja', label: t('common.japanese') },
+    { value: 'ko', label: t('common.korean') },
+    { value: 'fr', label: t('common.french') },
+    { value: 'de', label: t('common.german') },
+    { value: 'es', label: t('common.spanish') },
+    { value: 'ru', label: t('common.russian') }
+  ];
+
   return (
     <div className="space-y-6">
       {/* 并发请求设置 */}
@@ -141,20 +152,14 @@ const OtherTab: React.FC = () => {
           <Select
             value={settings.defaultSourceLang}
             onChange={(value) => handleChange('defaultSourceLang', value)}
-            options={[
-              { value: 'en', label: t('common.english') },
-              { value: 'zh', label: t('common.chinese') }
-            ]}
+            options={languageOptions}
             label={t('settings.other.defaultSourceLang')}
             className="mt-1"
           />
           <Select
             value={settings.defaultTargetLang}
             onChange={(value) => handleChange('defaultTargetLang', value)}
-            options={[
-              { value: 'zh', label: t('common.chinese') },
-              { value: 'en', label: t('common.english') }
-            ]}
+            options={languageOptions}
             label={t('settings.other.defaultTargetLang')}
             className="mt-1"
           />

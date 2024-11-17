@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Languages, Sun, Moon, Play } from 'lucide-react';
+import { Languages, Sun, Moon, Play, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import useStore from '../store';
 import { useTranslation } from 'react-i18next';
 import Select from './common/Select';
@@ -14,6 +14,7 @@ const Toolbar: React.FC = () => {
     setTargetLang,
     translate,
     isTranslating,
+    translationProgress,
     settings
   } = useStore();
   const { t } = useTranslation();
@@ -23,6 +24,23 @@ const Toolbar: React.FC = () => {
     setTargetLang(settings.defaultTargetLang);
   }, [settings.defaultSourceLang, settings.defaultTargetLang]);
 
+  const languageOptions = [
+    { value: 'en', label: t('common.english') },
+    { value: 'zh', label: t('common.chinese') },
+    { value: 'ja', label: t('common.japanese') },
+    { value: 'ko', label: t('common.korean') },
+    { value: 'fr', label: t('common.french') },
+    { value: 'de', label: t('common.german') },
+    { value: 'es', label: t('common.spanish') },
+    { value: 'ru', label: t('common.russian') }
+  ];
+
+  const swapLanguages = () => {
+    const temp = sourceLang;
+    setSourceLang(targetLang);
+    setTargetLang(temp);
+  };
+
   return (
     <div className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 shadow-sm dark:border-gray-800 dark:bg-gray-800">
       <div className="flex items-center space-x-4">
@@ -31,22 +49,24 @@ const Toolbar: React.FC = () => {
           <Select
             value={sourceLang}
             onChange={setSourceLang}
-            options={[
-              { value: 'en', label: t('common.english') },
-              { value: 'zh', label: t('common.chinese') }
-            ]}
+            options={languageOptions}
             disabled={isTranslating}
-            className="w-24"
+            className="w-32"
           />
-          <span className="text-gray-500 dark:text-gray-400">→</span>
+          <button
+            onClick={swapLanguages}
+            disabled={isTranslating}
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full disabled:opacity-50"
+            title={t('common.swapLanguages')}
+          >
+            <ArrowLeftRight className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+          </button>
           <Select
             value={targetLang}
             onChange={setTargetLang}
-            options={[
-              { value: 'zh', label: t('common.chinese') },
-              { value: 'en', label: t('common.english') }
-            ]}
+            options={languageOptions}
             disabled={isTranslating}
+            className="w-32"
           />
         </div>
         <button 
@@ -59,7 +79,11 @@ const Toolbar: React.FC = () => {
           }`}
         >
           <Play className={`h-4 w-4 ${isTranslating ? 'animate-spin' : ''}`} />
-          <span>{t(isTranslating ? 'common.translating' : 'common.translate')}</span>
+          <span>
+            {isTranslating 
+              ? `${t('common.translating')} ${translationProgress}%` 
+              : t('common.translate')}
+          </span>
         </button>
       </div>
       <button

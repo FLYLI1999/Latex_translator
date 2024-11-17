@@ -29,6 +29,7 @@ const Select: React.FC<SelectProps> = ({
 }) => {
   const baseStyles = `
     relative w-full rounded-md border py-1.5 pl-3 pr-8
+    min-w-[120px]
     focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
     disabled:cursor-not-allowed disabled:opacity-50
     transition-colors duration-200
@@ -49,7 +50,7 @@ const Select: React.FC<SelectProps> = ({
       )}
       <div className="relative">
         {icon && (
-          <div className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2">
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center z-10">
             {icon}
           </div>
         )}

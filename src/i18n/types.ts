@@ -11,6 +11,12 @@ export interface TranslationKeys {
     translatedText: string;
     english: string;
     chinese: string;
+    japanese: string;
+    korean: string;
+    french: string;
+    german: string;
+    spanish: string;
+    russian: string;
     darkMode: string;
     lightMode: string;
     appTitle: string;

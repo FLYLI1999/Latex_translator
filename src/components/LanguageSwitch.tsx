@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Languages } from 'lucide-react';
+import { Globe } from 'lucide-react';
 import useStore from '../store';
 import { toast } from 'react-toastify';
 import Select from './common/Select';
@@ -20,15 +20,23 @@ const LanguageSwitch: React.FC = () => {
     }
   };
 
+  const languageOptions = [
+    { value: 'en', label: t('common.english') },
+    { value: 'zh', label: t('common.chinese') },
+    { value: 'ja', label: t('common.japanese') },
+    { value: 'ko', label: t('common.korean') },
+    { value: 'fr', label: t('common.french') },
+    { value: 'de', label: t('common.german') },
+    { value: 'es', label: t('common.spanish') },
+    { value: 'ru', label: t('common.russian') }
+  ];
+
   return (
     <Select
       value={i18n.language}
       onChange={handleLanguageChange}
-      options={[
-        { value: 'en', label: t('common.english') },
-        { value: 'zh', label: t('common.chinese') }
-      ]}
-      icon={<Languages className="h-4 w-4 text-gray-500 dark:text-gray-400" />}
+      options={languageOptions}
+      icon={<Globe className="h-5 w-5 text-gray-500 dark:text-gray-400" />}
     />
   );
 };

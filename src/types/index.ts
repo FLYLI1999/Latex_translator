@@ -42,3 +42,10 @@ export interface Variable {
   description: string;
   example: string;
 }
+
+export type SupportedLanguage = 'en' | 'zh' | 'ja' | 'ko' | 'fr' | 'de' | 'es' | 'ru';
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
