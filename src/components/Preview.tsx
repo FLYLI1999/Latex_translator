@@ -18,19 +18,21 @@ const Preview: React.FC = () => {
   }
 
   return (
-    <div className="h-[calc(100vh-16rem)] overflow-auto p-4">
-      <div className="prose prose-sm dark:prose-invert max-w-none">
-        {translatedText ? (
-          settings.renderLatex ? (
-            <LatexRenderer content={translatedText} />
+    <div className="h-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+      <div className="h-full overflow-auto p-6">
+        <div className="prose prose-sm dark:prose-invert max-w-none">
+          {translatedText ? (
+            settings.renderLatex ? (
+              <LatexRenderer content={translatedText} />
+            ) : (
+              <div className="whitespace-pre-wrap">{translatedText}</div>
+            )
           ) : (
-            <div className="whitespace-pre-wrap">{translatedText}</div>
-          )
-        ) : (
-          <div className="flex h-full items-center justify-center text-gray-500">
-            {t('common.translatedText')}
-          </div>
-        )}
+            <div className="flex h-full items-center justify-center text-gray-500">
+              {t('common.translatedText')}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

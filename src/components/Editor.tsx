@@ -5,6 +5,16 @@ import useStore from '../store';
 const Editor: React.FC = () => {
   const { sourceText, setSourceText, darkMode } = useStore();
 
+  const handleEditorDidMount = (editor: any) => {
+    editor.onDidChangeModelContent(() => {
+      try {
+        setSourceText(editor.getValue());
+      } catch (error) {
+        console.error('Editor error:', error);
+      }
+    });
+  };
+
   return (
     <div className="h-[calc(100vh-16rem)]">
       <MonacoEditor
@@ -13,6 +23,7 @@ const Editor: React.FC = () => {
         theme={darkMode ? 'vs-dark' : 'light'}
         value={sourceText}
         onChange={(value) => setSourceText(value || '')}
+        onMount={handleEditorDidMount}
         options={{
           minimap: { enabled: false },
           fontSize: 14,

@@ -28,11 +28,11 @@ const Select: React.FC<SelectProps> = ({
   placeholder
 }) => {
   const baseStyles = `
-    relative w-full rounded-md border py-1.5 pl-3 pr-8
-    min-w-[120px]
-    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
+    relative w-full rounded-lg border py-2 pl-3 pr-8
+    text-sm
+    focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
     disabled:cursor-not-allowed disabled:opacity-50
-    transition-colors duration-200
+    transition-all duration-200
     dark:bg-gray-800 dark:text-white
     appearance-none
     ${disabled 

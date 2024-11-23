@@ -11,6 +11,12 @@ export default {
           },
         },
       },
+      height: {
+        'screen-header': 'calc(100vh - 64px)',
+      },
+      minHeight: {
+        'content': '500px',
+      }
     },
   },
   plugins: [

@@ -1,23 +1,21 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          i18n: ['i18next', 'react-i18next'],
-          editor: ['@monaco-editor/react'],
-        }
-      }
-    },
-    chunkSizeWarningLimit: 1000,
-    sourcemap: false
-  },
-  optimizeDeps: {
-    exclude: ['lucide-react']
+  server: {
+    headers: {
+      'Content-Security-Policy': `
+        default-src 'self';
+        connect-src 'self' https://api.openai.com https://*.supabase.co https://aihubmix.com;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+        style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        style-src-elem 'self' 'unsafe-inline' https://cdn.jsdelivr.net;
+        script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net;
+        font-src 'self' data: https://cdn.jsdelivr.net;
+        img-src 'self' data: https: blob:;
+        worker-src 'self' blob:;
+      `.replace(/\s+/g, ' ').trim()
+    }
   }
 });

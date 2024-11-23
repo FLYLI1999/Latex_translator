@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Languages, Sun, Moon, Play, ArrowRight, ArrowLeftRight } from 'lucide-react';
+import { Languages, Sun, Moon, Play, ArrowLeftRight } from 'lucide-react';
 import useStore from '../store';
 import { useTranslation } from 'react-i18next';
 import Select from './common/Select';
