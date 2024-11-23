@@ -40,7 +40,6 @@ interface TranslationStore {
   translate: () => Promise<void>;
   uploadFile: () => Promise<void>;
   downloadFile: () => void;
-  saveFile: () => void;
   copyToClipboard: () => void;
   
   // 国际化
@@ -193,17 +192,6 @@ const useStore = create<TranslationStore>((set, get) => ({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-  },
-
-  saveFile: () => {
-    const t = getT();
-    const { translatedText } = get();
-    
-    if (!translatedText.trim()) {
-      toast.error(t('errors.saveFailed'));
-      return;
-    }
-    // 实现保存功能
   },
 
   copyToClipboard: () => {

@@ -52,17 +52,17 @@ function App() {
               path="/"
               element={
                 <ProtectedRoute>
-                  <div className="min-h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
+                  <div className="min-h-screen flex flex-col">
                     <header className="border-b border-gray-200 dark:border-gray-800">
                       <div className="container mx-auto px-4 py-3">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
                           <div className="flex items-center space-x-4">
                             <BookOpen className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
                             <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                               {i18n.t('common.appTitle')}
                             </h1>
                           </div>
-                          <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2 sm:space-x-4 overflow-x-auto pb-2 sm:pb-0 scrollbar-none">
                             <button 
                               onClick={uploadFile}
                               className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -84,13 +84,7 @@ function App() {
                             >
                               <Clipboard className="h-5 w-5" />
                             </button>
-                            <button 
-                              onClick={saveFile}
-                              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                              title={i18n.t('common.save')}
-                            >
-                              <Save className="h-5 w-5" />
-                            </button>
+                            
                             <button 
                               onClick={openSettings}
                               className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
@@ -114,8 +108,8 @@ function App() {
                         </div>
                       </div>
                     </header>
-                    <main className="container mx-auto px-4 py-6">
-                      <div className="mt-6 grid grid-cols-2 gap-6">
+                    <main className="flex-1 container mx-auto px-4 py-6 overflow-hidden">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
                         <Editor />
                         <Preview />
                       </div>

@@ -22,7 +22,13 @@ const SettingsDialog: React.FC = () => {
   useEffect(() => {
     if (user) {
       fetchSettings();
-      fetchTemplates();
+      fetchTemplates().then(() => {
+        if (!settings?.selected_template_id && templates.length > 0) {
+          updateSettings({
+            selected_template_id: templates[0].id
+          });
+        }
+      });
       fetchHistory();
     }
   }, [user]);

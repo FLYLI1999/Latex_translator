@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { TranslationSettings } from '../types';
+import { useTemplateStore } from '../store/templates';
 
 export interface TranslationRequest {
   text: string;
@@ -16,9 +17,23 @@ export const translateText = async ({
 }: TranslationRequest) => {
   const { provider } = settings;
   
-  const selectedTemplate = settings.templates?.find(t => t.id === settings.selected_template_id);
-  const systemPrompt = selectedTemplate?.content || '';
-  
+  if (!settings.selected_template_id) {
+    console.error('No template selected:', settings);
+    throw new Error('未选择翻译模板');
+  }
+
+  const templates = useTemplateStore.getState().templates;
+  if (templates.length === 0) {
+    console.error('No templates available');
+    throw new Error('模板列表为空');
+  }
+
+  const selectedTemplate = templates.find(t => t.id === settings.selected_template_id);
+  if (!selectedTemplate) {
+    console.error('Selected template not found:', settings.selected_template_id);
+    throw new Error('所选模板不存在或已被删除');
+  }
+
   try {
     const api = axios.create({
       baseURL: provider.apiUrl,
@@ -33,7 +48,7 @@ export const translateText = async ({
       messages: [
         {
           role: 'system',
-          content: systemPrompt
+          content: selectedTemplate.content
             .replace('{sourceLang}', sourceLang)
             .replace('{targetLang}', targetLang)
         },

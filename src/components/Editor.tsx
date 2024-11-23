@@ -23,7 +23,7 @@ const Editor: React.FC = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-16rem)]">
+    <div className="h-[calc(100vh-16rem)] lg:h-[calc(100vh-12rem)]">
       <MonacoEditor
         height="100%"
         defaultLanguage="latex"
@@ -38,6 +38,7 @@ const Editor: React.FC = () => {
           lineNumbers: 'on',
           renderWhitespace: 'selection',
           scrollBeyondLastLine: false,
+          automaticLayout: true
         }}
       />
     </div>

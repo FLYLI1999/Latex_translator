@@ -114,6 +114,8 @@ export interface TranslationKeys {
     cannotReorderBuiltIn: string;
     updateSettingsFailed: string;
     saveTemplateFailed: string;
+    updateOrderFailed: string;
+    deleteTemplateFailed: string;
   };
   success: {
     uploadSuccess: string;

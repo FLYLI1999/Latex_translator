@@ -12,7 +12,7 @@ export const templateService = {
     return withRetry(async () => {
       const { data, error } = await supabase
         .from('translation_templates')
-        .select('id, name, content, tags, is_built_in, display_order')
+        .select('*')
         .or(`user_id.eq.${userId},is_built_in.eq.true`)
         .order('display_order', { ascending: true })
         .limit(50);

@@ -44,10 +44,16 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       
       if (!settings) {
         const defaultSettings = {
+          id: 'temp',
           user_id: user.id,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          ...DEFAULT_SETTINGS
+          display_name: DEFAULT_SETTINGS.display_name,
+          interface_language: DEFAULT_SETTINGS.interface_language,
+          theme: DEFAULT_SETTINGS.theme,
+          api_settings: DEFAULT_SETTINGS.api_settings as Database['public']['Tables']['user_settings']['Row']['api_settings'],
+          translation_settings: DEFAULT_SETTINGS.translation_settings as Database['public']['Tables']['user_settings']['Row']['translation_settings'],
+          selected_template_id: DEFAULT_SETTINGS.selected_template_id
         };
         
         try {
@@ -55,7 +61,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         } catch (createError) {
           console.error('创建默认设置失败:', createError);
           settings = {
-            id: 'temp',
             ...defaultSettings
           };
         }
@@ -69,7 +74,12 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
         user_id: user.id,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        ...DEFAULT_SETTINGS
+        display_name: DEFAULT_SETTINGS.display_name,
+        interface_language: DEFAULT_SETTINGS.interface_language,
+        theme: DEFAULT_SETTINGS.theme,
+        api_settings: DEFAULT_SETTINGS.api_settings as Database['public']['Tables']['user_settings']['Row']['api_settings'],
+        translation_settings: DEFAULT_SETTINGS.translation_settings as Database['public']['Tables']['user_settings']['Row']['translation_settings'],
+        selected_template_id: DEFAULT_SETTINGS.selected_template_id
       };
       set({ 
         settings: defaultSettings,
@@ -88,7 +98,12 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const updated = await settingsService.updateUserSettings(user.id, newSettings);
-      set({ settings: updated });
+      set(state => ({
+        settings: state.settings ? {
+          ...state.settings,
+          ...updated
+        } : updated
+      }));
       toast.success('设置已更新');
     } catch (error) {
       set({ error: error as Error });

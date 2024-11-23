@@ -20,9 +20,9 @@ const Preview: React.FC = () => {
   }
 
   return (
-    <div className="h-full rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
-      <div className="h-full overflow-auto p-6">
-        <div className="prose prose-sm dark:prose-invert max-w-none">
+    <div className="h-[calc(100vh-16rem)] lg:h-[calc(100vh-12rem)] rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden shadow-sm">
+      <div className="h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
+        <div className="prose prose-sm sm:prose lg:prose-lg dark:prose-invert max-w-none p-4 sm:p-6">
           {translatedText ? (
             settings?.translation_settings?.renderLatex ? (
               <LatexRenderer content={translatedText} />

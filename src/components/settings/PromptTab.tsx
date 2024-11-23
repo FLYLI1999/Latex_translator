@@ -40,7 +40,11 @@ const PromptTab: React.FC<PromptTabProps> = ({ settings, onUpdate }) => {
   const handleTemplateSelect = async (template: PromptTemplate) => {
     try {
       await onUpdate({
-        selected_template_id: template.id
+        selected_template_id: template.id,
+        translation_settings: {
+          ...settings.translation_settings,
+          selected_template_id: template.id
+        }
       });
     } catch (error) {
       toast.error(t('errors.updateSettingsFailed'));

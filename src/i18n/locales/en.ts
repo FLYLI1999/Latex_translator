@@ -113,7 +113,9 @@ export default {
     invalidTag: 'Invalid tag',
     cannotReorderBuiltIn: 'Cannot reorder built-in templates',
     updateSettingsFailed: 'Failed to update settings',
-    saveTemplateFailed: 'Failed to save template'
+    saveTemplateFailed: 'Failed to save template',
+    updateOrderFailed: 'Failed to update order',
+    deleteTemplateFailed: 'Failed to delete template'
   },
   success: {
     uploadSuccess: 'File uploaded successfully',

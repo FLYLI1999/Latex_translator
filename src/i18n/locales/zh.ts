@@ -113,7 +113,9 @@ export default {
     invalidTag: '无效的标签',
     cannotReorderBuiltIn: '内建模板无法改变顺序',
     updateSettingsFailed: '更新设置失败',
-    saveTemplateFailed: '保存模板失败'
+    saveTemplateFailed: '保存模板失败',
+    updateOrderFailed: '更新顺序失败',
+    deleteTemplateFailed: '删除模板失败'
   },
   success: {
     uploadSuccess: '文件上传成功',
