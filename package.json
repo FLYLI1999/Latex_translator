@@ -11,7 +11,8 @@
     "start": "vite",
     "build:prod": "tsc && vite build --mode production",
     "preview:prod": "vite preview --port 4173",
-    "analyze": "vite build --mode analyze"
+    "analyze": "vite build --mode analyze",
+    "migrate": "ts-node scripts/migrateData.ts"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^16.5.0",
