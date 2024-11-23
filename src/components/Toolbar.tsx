@@ -1,28 +1,33 @@
 import React, { useEffect } from 'react';
 import { Languages, Sun, Moon, Play, ArrowLeftRight } from 'lucide-react';
-import useStore from '../store';
 import { useTranslation } from 'react-i18next';
 import Select from './common/Select';
+import { useSettingsStore } from '../store/settings';
+import { useTemplateStore } from '../store/templates';
+import useStore from '../store';
 
 const Toolbar: React.FC = () => {
+  const { settings } = useSettingsStore();
+  const { templates, selectedTemplate, selectTemplate } = useTemplateStore();
   const { 
     darkMode, 
-    toggleDarkMode, 
-    sourceLang, 
-    targetLang, 
-    setSourceLang, 
+    toggleDarkMode,
+    sourceLang,
+    targetLang,
+    setSourceLang,
     setTargetLang,
     translate,
     isTranslating,
-    translationProgress,
-    settings
+    translationProgress
   } = useStore();
   const { t } = useTranslation();
 
   useEffect(() => {
-    setSourceLang(settings.defaultSourceLang);
-    setTargetLang(settings.defaultTargetLang);
-  }, [settings.defaultSourceLang, settings.defaultTargetLang]);
+    if (settings?.translation_settings) {
+      setSourceLang(settings.translation_settings.defaultSourceLang);
+      setTargetLang(settings.translation_settings.defaultTargetLang);
+    }
+  }, [settings?.translation_settings]);
 
   const languageOptions = [
     { value: 'en', label: t('common.english') },

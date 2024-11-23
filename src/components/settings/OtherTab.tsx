@@ -1,20 +1,41 @@
-import React from 'react';
-import useStore from '../../store';
+import React, { useState } from 'react';
 import { Settings2, Zap, Clock, Split, Languages } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import Select from '../common/Select';
+import { DEFAULT_SETTINGS, ApiSettings, TranslationSettings } from '../../constants/defaultSettings';
+import type { Database } from '../../types/supabase';
 
-const OtherTab: React.FC = () => {
-  const { settings, updateSettings, clearRenderError } = useStore();
+type UserSettings = Database['public']['Tables']['user_settings']['Row'];
+type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update'];
+
+interface OtherTabProps {
+  settings: UserSettings;
+  onUpdate: (settings: UserSettingsUpdate) => Promise<void>;
+}
+
+const OtherTab: React.FC<OtherTabProps> = ({ settings, onUpdate }) => {
   const { t } = useTranslation();
+  const [localSettings, setLocalSettings] = useState<TranslationSettings>({
+    ...DEFAULT_SETTINGS.translation_settings,
+    ...settings.translation_settings,
+  });
 
-  const handleChange = (field: keyof typeof settings, value: any) => {
-    if (field === 'renderLatex') {
-      clearRenderError();
-    }
-    updateSettings({
-      ...settings,
-      [field]: value,
+  const handleTranslationSettingsChange = (field: string, value: any) => {
+    setLocalSettings(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleApply = async () => {
+    await onUpdate({
+      translation_settings: localSettings
+    });
+  };
+
+  const handleReset = () => {
+    setLocalSettings({
+      ...DEFAULT_SETTINGS.translation_settings as TranslationSettings
     });
   };
 
@@ -42,13 +63,10 @@ const OtherTab: React.FC = () => {
             type="number"
             min="1"
             max="10"
-            value={settings.maxConcurrentRequests}
-            onChange={(e) => handleChange('maxConcurrentRequests', parseInt(e.target.value, 10))}
+            value={localSettings.maxConcurrentRequests}
+            onChange={(e) => handleTranslationSettingsChange('maxConcurrentRequests', parseInt(e.target.value, 10))}
             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {t('settings.other.maxRequestsDesc')}
-          </p>
         </div>
       </div>
 
@@ -61,86 +79,17 @@ const OtherTab: React.FC = () => {
               {t('settings.other.renderLatex')}
             </label>
             <button
-              onClick={() => handleChange('renderLatex', !settings.renderLatex)}
+              onClick={() => handleTranslationSettingsChange('renderLatex', !localSettings.renderLatex)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
-                settings.renderLatex 
+                localSettings.renderLatex 
                   ? 'bg-indigo-600 dark:bg-indigo-500' 
                   : 'bg-gray-200 dark:bg-gray-600'
               }`}
             >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:bg-gray-200 ${
-                  settings.renderLatex ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:bg-gray-200 ${
+                localSettings.renderLatex ? 'translate-x-6' : 'translate-x-1'
+              }`} />
             </button>
-          </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {t('settings.other.renderLatexDesc')}
-          </p>
-        </div>
-      </div>
-
-      {/* 自动翻译开关 */}
-      <div className="flex items-start space-x-3">
-        <Clock className="mt-1 h-5 w-5 text-gray-400" />
-        <div className="flex-1">
-          <div className="flex items-center justify-between">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('settings.other.autoTranslate')}
-            </label>
-            <button
-              onClick={() => handleChange('autoTranslate', !settings.autoTranslate)}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 ${
-                settings.autoTranslate 
-                  ? 'bg-indigo-600 dark:bg-indigo-500' 
-                  : 'bg-gray-200 dark:bg-gray-600'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform dark:bg-gray-200 ${
-                  settings.autoTranslate ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
-            </button>
-          </div>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            {t('settings.other.autoTranslateDesc')}
-          </p>
-        </div>
-      </div>
-
-      {/* 分块设置 */}
-      <div className="flex items-start space-x-3">
-        <Split className="mt-1 h-5 w-5 text-gray-400" />
-        <div className="flex-1 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('settings.other.chunkSize')}
-            </label>
-            <input
-              type="number"
-              min="100"
-              max="50000"
-              step="100"
-              value={settings.chunkSize}
-              onChange={(e) => handleChange('chunkSize', parseInt(e.target.value, 10))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('settings.other.chunkDelay')}
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="500000"
-              step="1000"
-              value={settings.delayBetweenChunks}
-              onChange={(e) => handleChange('delayBetweenChunks', parseInt(e.target.value, 10))}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            />
           </div>
         </div>
       </div>
@@ -150,15 +99,15 @@ const OtherTab: React.FC = () => {
         <Languages className="mt-1 h-5 w-5 text-gray-400" />
         <div className="flex-1 space-y-4">
           <Select
-            value={settings.defaultSourceLang}
-            onChange={(value) => handleChange('defaultSourceLang', value)}
+            value={localSettings.defaultSourceLang}
+            onChange={(value) => handleTranslationSettingsChange('defaultSourceLang', value)}
             options={languageOptions}
             label={t('settings.other.defaultSourceLang')}
             className="mt-1"
           />
           <Select
-            value={settings.defaultTargetLang}
-            onChange={(value) => handleChange('defaultTargetLang', value)}
+            value={localSettings.defaultTargetLang}
+            onChange={(value) => handleTranslationSettingsChange('defaultTargetLang', value)}
             options={languageOptions}
             label={t('settings.other.defaultTargetLang')}
             className="mt-1"
@@ -176,10 +125,26 @@ const OtherTab: React.FC = () => {
           min="0"
           max="2"
           step="0.1"
-          value={settings.temperature}
-          onChange={(e) => handleChange('temperature', parseFloat(e.target.value))}
+          value={localSettings.temperature}
+          onChange={(e) => handleTranslationSettingsChange('temperature', parseFloat(e.target.value))}
           className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         />
+      </div>
+
+      {/* Apply 和 Reset 按钮 */}
+      <div className="flex justify-end space-x-3 pt-4 border-t dark:border-gray-700">
+        <button
+          onClick={handleReset}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+        >
+          {t('common.reset')}
+        </button>
+        <button
+          onClick={handleApply}
+          className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800"
+        >
+          {t('common.apply')}
+        </button>
       </div>
     </div>
   );

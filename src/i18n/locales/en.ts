@@ -1,8 +1,9 @@
 export default {
   common: {
     upload: 'Upload',
-    download: 'Download',
+    download: 'Download', 
     save: 'Save',
+    copy: 'Copy',
     settings: 'Settings',
     translate: 'Translate',
     translating: 'Translating...',
@@ -20,8 +21,12 @@ export default {
     lightMode: 'Light Mode',
     appTitle: 'LaTeX Translator',
     cancel: 'Cancel',
+    reset: 'Reset',
+    apply: 'Apply',
     add: 'Add',
     remove: 'Remove',
+    swapLanguages: 'Swap Languages',
+    close: 'Close',
     languageChange: {
       pending: 'Switching language...',
       success: 'Language switched successfully',
@@ -32,6 +37,10 @@ export default {
     edit: 'Edit',
     delete: 'Delete'
   },
+  auth: {
+    title: 'Login',
+    retrying: 'Retrying login...'
+  },
   settings: {
     provider: {
       title: 'Provider Settings',
@@ -41,6 +50,9 @@ export default {
       urlPlaceholder: 'e.g. https://api.example.com/v1',
       model: 'Model',
       modelPlaceholder: 'e.g. gpt-3.5-turbo',
+      modelId: 'Model ID',
+      modelName: 'Model Name',
+      models: 'Available Models'
     },
     prompt: {
       title: 'Prompt Settings',
@@ -63,7 +75,7 @@ export default {
       builtInTemplate: 'Built-in Template',
       customTemplate: 'Custom Template',
       tagInputTip: 'Use comma or Enter key to separate multiple tags',
-      noTags: 'No tags',
+      noTags: 'No tags'
     },
     other: {
       title: 'Other Settings',
@@ -80,8 +92,8 @@ export default {
       temperature: 'Temperature',
       temperatureDesc: 'Randomness of generated text (0-2)',
       defaultApiUrl: 'Default API URL',
-      downloadFilePrefix: 'Download File Prefix',
-    },
+      downloadFilePrefix: 'Download File Prefix'
+    }
   },
   errors: {
     uploadFailed: 'File upload failed',
@@ -91,14 +103,17 @@ export default {
     apiConfigRequired: 'Please configure API settings first',
     emptyContent: 'Please enter content to translate',
     renderError: 'Render error',
-    i18nChangeFailed: 'Language initialization failed',
+    noContentToCopy: 'No content to copy',
+    copyFailed: 'Failed to copy to clipboard',
     i18nInitFailed: 'Language initialization failed',
+    i18nChangeFailed: 'Language initialization failed',
     templateNameRequired: 'Template name is required',
     templateContentRequired: 'Template content is required',
     duplicateTag: 'Tag already exists',
     invalidTag: 'Invalid tag',
-    noContentToCopy: 'No content to copy',
-    copyFailed: 'Failed to copy to clipboard'
+    cannotReorderBuiltIn: 'Cannot reorder built-in templates',
+    updateSettingsFailed: 'Failed to update settings',
+    saveTemplateFailed: 'Failed to save template'
   },
   success: {
     uploadSuccess: 'File uploaded successfully',
@@ -106,5 +121,5 @@ export default {
     copySuccess: 'Copied to clipboard',
     templateSaved: 'Template saved successfully',
     templateDeleted: 'Template deleted successfully'
-  },
+  }
 };

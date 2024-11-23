@@ -4,7 +4,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n/config';
 import { Github, Settings, BookOpen, Save, Download, Upload, Clipboard } from 'lucide-react';
 import { ToastContainer } from 'react-toastify';
-import useStore from './store';
+import useStore from './store/index';
 import AuthPage from './components/auth/AuthPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Editor from './components/Editor';
@@ -14,15 +14,28 @@ import SettingsDialog from './components/settings/SettingsDialog';
 import LanguageSwitch from './components/LanguageSwitch';
 import 'react-toastify/dist/ReactToastify.css';
 import useAuthStore from './store/auth';
+import { useSettingsStore } from './store/settings';
+import { useTemplateStore } from './store/templates';
 
 function App() {
-  const { darkMode, openSettings, uploadFile, downloadFile, saveFile, copyToClipboard } = useStore();
-  const { checkAuth } = useAuthStore();
+  const { darkMode, openSettings, uploadFile, downloadFile, saveFile, copyToClipboard, isSettingsOpen } = useStore();
+  const { checkAuth, isAuthenticated } = useAuthStore();
+  const { fetchSettings } = useSettingsStore();
+  const { fetchTemplates } = useTemplateStore();
 
   useEffect(() => {
     checkAuth();
     document.title = i18n.t('common.appTitle');
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated && window.location.pathname !== '/auth') {
+      Promise.all([
+        fetchSettings(),
+        fetchTemplates()
+      ]).catch(console.error);
+    }
+  }, [isAuthenticated]);
 
   return (
     <I18nextProvider i18n={i18n}>
@@ -107,7 +120,7 @@ function App() {
                         <Preview />
                       </div>
                     </main>
-                    <SettingsDialog />
+                    {isSettingsOpen && <SettingsDialog />}
                   </div>
                 </ProtectedRoute>
               }

@@ -8,11 +8,11 @@ export interface LLMProvider {
 export interface PromptTemplate {
   id: string;
   name: string;
-  description: string;
+  description?: string | null;
   content: string;
   tags: string[];
-  isBuiltIn?: boolean;
-  order?: number;
+  is_built_in: boolean;
+  display_order?: number;
 }
 
 export interface TranslationSettings {
@@ -29,7 +29,7 @@ export interface TranslationSettings {
   defaultApiUrl: string;
   downloadFilePrefix: string;
   templates: PromptTemplate[];
-  selectedTemplateId?: string;
+  selected_template_id?: string;
 }
 
 export interface SettingsState {

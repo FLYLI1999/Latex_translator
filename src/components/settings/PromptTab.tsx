@@ -1,93 +1,107 @@
 import React, { useState, useRef } from 'react';
-import useStore from '../../store';
+import { useTemplateStore } from '../../store/templates';
 import { useTranslation } from 'react-i18next';
 import { Plus, Search } from 'lucide-react';
 import { PromptTemplate, Variable } from '../../types';
 import { toast } from 'react-toastify';
 import TagInput from './TagInput';
 import TemplateCard from './TemplateCard';
+import type { Database } from '../../types/supabase';
+
+type UserSettings = Database['public']['Tables']['user_settings']['Row'];
+type UserSettingsUpdate = Database['public']['Tables']['user_settings']['Update'];
 
 const VARIABLES: Variable[] = [
   { name: '{sourceLang}', description: 'Source language', example: 'English' },
   { name: '{targetLang}', description: 'Target language', example: 'Chinese' },
 ];
 
-const BUILT_IN_TEMPLATES: PromptTemplate[] = [
-  {
-    id: 'default',
-    name: 'Default Translator',
-    description: 'Standard LaTeX translation template',
-    content: 'You are a LaTeX document translator. Translate the following LaTeX content from {sourceLang} to {targetLang}.',
-    tags: ['general', 'latex'],
-    isBuiltIn: true,
-    order: 0,
-  },
-  {
-    id: 'academic',
-    name: 'Academic Papers',
-    description: 'Specialized for academic paper translation',
-    content: 'You are an academic paper translator specializing in LaTeX documents. Translate from {sourceLang} to {targetLang} while maintaining academic terminology.',
-    tags: ['academic', 'research'],
-    isBuiltIn: true,
-    order: 1,
-  },
-];
+interface PromptTabProps {
+  settings: UserSettings;
+  onUpdate: (settings: UserSettingsUpdate) => Promise<void>;
+}
 
-const PromptTab: React.FC = () => {
-  const { settings, updateSettings } = useStore();
+const PromptTab: React.FC<PromptTabProps> = ({ settings, onUpdate }) => {
   const { t } = useTranslation();
+  const { templates, createTemplate, updateTemplate, deleteTemplate } = useTemplateStore();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedVariable, setSelectedVariable] = useState<Variable | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<PromptTemplate | null>(null);
   const [draggedItem, setDraggedItem] = useState<PromptTemplate | null>(null);
   const dragOverItemRef = useRef<string | null>(null);
 
-  const templates = [...BUILT_IN_TEMPLATES, ...(settings.templates || [])];
-
   const filteredTemplates = templates.filter(template => 
     template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    template.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
   );
+  
 
-  const handleTemplateSelect = (template: PromptTemplate) => {
-    updateSettings({
-      ...settings,
-      systemPrompt: template.content,
-      selectedTemplateId: template.id,
-    });
-  };
-
-  const handleVariableInsert = (variable: Variable) => {
-    const textarea = document.getElementById('promptEditor') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      const newText = text.substring(0, start) + variable.name + text.substring(end);
-      updateSettings({
-        ...settings,
-        systemPrompt: newText,
+  const handleTemplateSelect = async (template: PromptTemplate) => {
+    try {
+      await onUpdate({
+        selected_template_id: template.id
       });
-      setSelectedVariable(null);
+    } catch (error) {
+      toast.error(t('errors.updateSettingsFailed'));
     }
   };
 
-  const handleDragStart = (template: PromptTemplate) => {
-    if (!template.isBuiltIn) {
-      setDraggedItem(template);
+  const handleTemplateSave = async () => {
+    if (!editingTemplate) return;
+
+    if (!editingTemplate.name.trim()) {
+      toast.error(t('errors.templateNameRequired'));
+      return;
+    }
+
+    try {
+      if (editingTemplate.id.startsWith('template-')) {
+        // 新模板
+        await createTemplate({
+          name: editingTemplate.name,
+          description: editingTemplate.description || '',
+          content: editingTemplate.content,
+          tags: editingTemplate.tags,
+          display_order: templates.length
+        });
+      } else {
+        // 更新现有模板
+        await updateTemplate(editingTemplate.id, {
+          name: editingTemplate.name,
+          description: editingTemplate.description || '',
+          content: editingTemplate.content,
+          tags: editingTemplate.tags
+        });
+      }
+      setIsEditing(false);
+      setEditingTemplate(null);
+    } catch (error) {
+      toast.error(t('errors.saveTemplateFailed'));
     }
   };
 
-  const handleDragOver = (e: React.DragEvent, templateId: string) => {
-    e.preventDefault();
-    dragOverItemRef.current = templateId;
+  const handleTemplateDelete = async (templateId: string) => {
+    if (!window.confirm(t('settings.prompt.confirmDelete'))) return;
+    
+    try {
+      await deleteTemplate(templateId);
+      if (settings.selected_template_id === templateId) {
+        await onUpdate({ selected_template_id: null });
+      }
+    } catch (error) {
+      toast.error(t('errors.deleteTemplateFailed'));
+    }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     if (!draggedItem || !dragOverItemRef.current) return;
+
+    if (draggedItem.is_built_in) {
+      toast.error(t('errors.cannotReorderBuiltIn'));
+      return;
+    }
 
     const items = Array.from(filteredTemplates);
     const draggedIndex = items.findIndex(item => item.id === draggedItem.id);
@@ -95,42 +109,16 @@ const PromptTab: React.FC = () => {
 
     if (draggedIndex === -1 || dropIndex === -1) return;
 
-    items.splice(draggedIndex, 1);
-    items.splice(dropIndex, 0, draggedItem);
-
-    const updatedTemplates = items
-      .filter(item => !item.isBuiltIn)
-      .map((item, index) => ({
-        ...item,
-        order: index,
-      }));
-
-    updateSettings({
-      ...settings,
-      templates: updatedTemplates,
-    });
-
-    setDraggedItem(null);
-    dragOverItemRef.current = null;
-  };
-
-  const handleTemplateDelete = (templateId: string) => {
-    if (window.confirm(t('settings.prompt.confirmDelete'))) {
-      const updatedTemplates = (settings.templates || []).filter(t => t.id !== templateId);
-      updateSettings({
-        ...settings,
-        templates: updatedTemplates,
+    try {
+      await updateTemplate(draggedItem.id, {
+        display_order: dropIndex
       });
-      toast.success(t('success.templateDeleted'));
+      
+      setDraggedItem(null);
+      dragOverItemRef.current = null;
+    } catch (error) {
+      toast.error(t('errors.updateOrderFailed'));
     }
-  };
-
-  const handleTemplateEdit = (template: PromptTemplate) => {
-    setEditingTemplate({
-      ...template,
-      tags: Array.isArray(template.tags) ? [...template.tags] : [],
-    });
-    setIsEditing(true);
   };
 
   const handleNewTemplate = () => {
@@ -140,74 +128,38 @@ const PromptTab: React.FC = () => {
       description: '',
       content: '',
       tags: [],
-      order: (settings.templates || []).length,
+      is_built_in: false
     });
     setIsEditing(true);
   };
 
-  const handleTemplateSave = () => {
-    if (!editingTemplate) return;
-
-    if (!editingTemplate.name.trim()) {
-      toast.error(t('errors.templateNameRequired'));
-      return;
-    }
-
-    if (!editingTemplate.content.trim()) {
-      toast.error(t('errors.templateContentRequired'));
-      return;
-    }
-
-    const currentTemplates = settings.templates || [];
-    
-    const templateToSave = {
-      ...editingTemplate,
-      tags: Array.isArray(editingTemplate.tags) ? [...editingTemplate.tags] : [],
-    };
-    
-    let updatedTemplates;
-    const existingTemplateIndex = currentTemplates.findIndex(t => t.id === templateToSave.id);
-    
-    if (existingTemplateIndex !== -1) {
-      updatedTemplates = currentTemplates.map(t => 
-        t.id === templateToSave.id ? templateToSave : t
-      );
-    } else {
-      updatedTemplates = [...currentTemplates, {
-        ...templateToSave,
-        order: currentTemplates.length
-      }];
-    }
-
-    const newSettings = {
-      ...settings,
-      templates: updatedTemplates,
-    };
-
-    if (settings.selectedTemplateId === templateToSave.id) {
-      newSettings.systemPrompt = templateToSave.content;
-    }
-
-    updateSettings(newSettings);
-    toast.success(t('success.templateSaved'));
-    setIsEditing(false);
-    setEditingTemplate(null);
+  const handleTemplateEdit = (template: PromptTemplate) => {
+    setEditingTemplate(template);
+    setIsEditing(true);
   };
 
   const handleTemplateVariableInsert = (variable: Variable) => {
-    if (!editingTemplate) return;
+    const editor = document.getElementById('templateContentEditor') as HTMLTextAreaElement;
+    if (!editor) return;
     
-    const textarea = document.getElementById('templateContentEditor') as HTMLTextAreaElement;
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
-      const text = textarea.value;
-      const newText = text.substring(0, start) + variable.name + text.substring(end);
-      setEditingTemplate({
-        ...editingTemplate,
-        content: newText,
-      });
-    }
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const content = editor.value;
+    const newContent = content.substring(0, start) + variable.name + content.substring(end);
+    
+    setEditingTemplate({
+      ...editingTemplate!,
+      content: newContent
+    });
+  };
+
+  const handleDragStart = (template: PromptTemplate) => {
+    setDraggedItem(template);
+  };
+
+  const handleDragOver = (e: React.DragEvent, templateId: string) => {
+    e.preventDefault();
+    dragOverItemRef.current = templateId;
   };
 
   return (
@@ -238,15 +190,15 @@ const PromptTab: React.FC = () => {
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 auto-rows-max">
           {filteredTemplates
             .sort((a, b) => {
-              if (a.isBuiltIn && !b.isBuiltIn) return -1;
-              if (!a.isBuiltIn && b.isBuiltIn) return 1;
-              return (a.order || 0) - (b.order || 0);
+              if (a.is_built_in && !b.is_built_in) return -1;
+              if (!a.is_built_in && b.is_built_in) return 1;
+              return (a.display_order || 0) - (b.display_order || 0);
             })
             .map((template) => (
               <TemplateCard
                 key={template.id}
                 template={template}
-                isSelected={settings.selectedTemplateId === template.id}
+                isSelected={settings.selected_template_id === template.id}
                 onEdit={handleTemplateEdit}
                 onDelete={() => handleTemplateDelete(template.id)}
                 onSelect={handleTemplateSelect}

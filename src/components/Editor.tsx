@@ -1,9 +1,11 @@
 import React from 'react';
 import MonacoEditor from '@monaco-editor/react';
-import useStore from '../store';
+import useStore from '../store/index';
+import { useHistoryStore } from '../store/history';
 
 const Editor: React.FC = () => {
   const { sourceText, setSourceText, darkMode } = useStore();
+  const { history } = useHistoryStore();
 
   const handleEditorDidMount = (editor: any) => {
     editor.onDidChangeModelContent(() => {
@@ -13,6 +15,11 @@ const Editor: React.FC = () => {
         console.error('Editor error:', error);
       }
     });
+  };
+
+  // 编辑器内容变更时自动保存到历史记录
+  const handleContentChange = (value: string) => {
+    setSourceText(value);
   };
 
   return (

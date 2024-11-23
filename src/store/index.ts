@@ -1,44 +1,22 @@
 import { create } from 'zustand';
-import { translateText } from './services/api';
+import { translateText } from '../services/api';
 import { toast } from 'react-toastify';
-import { LLMProvider, TranslationSettings, SettingsState, PromptTemplate } from './types';
-import i18n from './i18n/config';
-
-// Default system prompt
-const DEFAULT_SYSTEM_PROMPT = `You are a LaTeX document translator. Translate the following LaTeX content from {sourceLang} to {targetLang}.
-Preserve all LaTeX commands and structure. Only translate the actual text content.
-Maintain the exact same formatting, spacing, and LaTeX syntax.
-If you find any syntax errors in the original LaTeX content, please point them out and suggest corrections, but do not modify them during translation.`;
+import i18n from '../i18n/config';
+import { useSettingsStore } from './settings';
+import { useTemplateStore } from './templates';
+import { useHistoryStore } from './history';
 
 const getT = () => i18n.t.bind(i18n);
 
-const defaultProvider: LLMProvider = {
-  name: 'OpenAI',
-  apiUrl: 'https://api.openai.com/v1',
-  apiKey: '',
-  model: 'gpt-3.5-turbo',
-};
-
-const defaultSettings: TranslationSettings = {
-  maxConcurrentRequests: 5,
-  systemPrompt: DEFAULT_SYSTEM_PROMPT,
-  provider: defaultProvider,
-  renderLatex: false,
-  autoTranslate: false,
-  chunkSize: 5000,
-  delayBetweenChunks: 500,
-  defaultSourceLang: 'zh',
-  defaultTargetLang: 'en',
-  temperature: 0.3,
-  defaultApiUrl: 'https://api.openai.com/v1',
-  downloadFilePrefix: 'translated_',
-  templates: [],
-  selectedTemplateId: 'default',
-};
-
-interface Store {
+interface TranslationStore {
+  // UI 状态
   darkMode: boolean;
+  isSettingsOpen: boolean;
   toggleDarkMode: () => void;
+  openSettings: () => void;
+  closeSettings: () => void;
+  
+  // 翻译状态
   sourceText: string;
   setSourceText: (text: string) => void;
   translatedText: string;
@@ -47,61 +25,72 @@ interface Store {
   setSourceLang: (lang: string) => void;
   targetLang: string;
   setTargetLang: (lang: string) => void;
+  
+  // 错误处理
   renderError: string | null;
   setRenderError: (error: string) => void;
   clearRenderError: () => void;
+  
+  // 翻译进度
   isTranslating: boolean;
+  translationProgress: number;
+  setTranslationProgress: (progress: number) => void;
+  
+  // 核心功能
   translate: () => Promise<void>;
-  settings: TranslationSettings;
-  updateSettings: (settings: TranslationSettings) => void;
-  settingsState: SettingsState;
-  openSettings: () => void;
-  closeSettings: () => void;
   uploadFile: () => Promise<void>;
   downloadFile: () => void;
   saveFile: () => void;
   copyToClipboard: () => void;
+  
+  // 国际化
   i18n: {
     currentLanguage: string;
     isChangingLanguage: boolean;
   };
   setLanguage: (lang: string) => Promise<void>;
-  translationProgress: number;
-  setTranslationProgress: (progress: number) => void;
 }
 
-const useStore = create<Store>((set, get) => ({
+const useStore = create<TranslationStore>((set, get) => ({
+  // UI 状态
   darkMode: false,
+  isSettingsOpen: false,
   toggleDarkMode: () => set(state => ({ darkMode: !state.darkMode })),
+  openSettings: () => set({ isSettingsOpen: true }),
+  closeSettings: () => set({ isSettingsOpen: false }),
   
+  // 翻译状态
   sourceText: '',
   setSourceText: (text: string) => set({ sourceText: text }),
-  
   translatedText: '',
   setTranslatedText: (text: string) => set({ translatedText: text }),
-  
-  sourceLang: defaultSettings.defaultSourceLang,
+  sourceLang: 'zh',
   setSourceLang: (lang: string) => set({ sourceLang: lang }),
-  
-  targetLang: defaultSettings.defaultTargetLang,
+  targetLang: 'en',
   setTargetLang: (lang: string) => set({ targetLang: lang }),
   
+  // 错误处理
   renderError: null,
   setRenderError: (error: string) => set({ renderError: error }),
   clearRenderError: () => set({ renderError: null }),
   
+  // 翻译状态
   isTranslating: false,
+  translationProgress: 0,
+  setTranslationProgress: (progress: number) => set({ translationProgress: progress }),
   
+  // 核心功能
   translate: async () => {
     const t = getT();
-    const { sourceText, sourceLang, targetLang, settings } = get();
+    const { sourceText, sourceLang, targetLang } = get();
+    const settings = useSettingsStore.getState().settings;
     
     if (!sourceText.trim()) {
       toast.error(t('errors.emptyContent'));
       return;
     }
 
-    if (!settings.provider.apiKey || !settings.provider.apiUrl) {
+    if (!settings?.api_settings.apiKey || !settings?.api_settings.apiUrl) {
       toast.error(t('errors.apiConfigRequired'));
       return;
     }
@@ -114,7 +103,7 @@ const useStore = create<Store>((set, get) => ({
       let currentChunk = '';
 
       for (const line of lines) {
-        if (currentChunk.length + line.length > settings.chunkSize) {
+        if (currentChunk.length + line.length > settings.translation_settings.chunkSize) {
           chunks.push(currentChunk);
           currentChunk = line;
         } else {
@@ -125,22 +114,36 @@ const useStore = create<Store>((set, get) => ({
 
       const results: string[] = [];
       for (let i = 0; i < chunks.length; i++) {
-        if (i >= settings.maxConcurrentRequests) {
+        if (i >= settings.translation_settings.maxConcurrentRequests) {
           await new Promise(resolve => 
-            setTimeout(resolve, Math.floor(i / settings.maxConcurrentRequests) * settings.delayBetweenChunks)
+            setTimeout(resolve, Math.floor(i / settings.translation_settings.maxConcurrentRequests) * settings.translation_settings.delayBetweenChunks)
           );
         }
         const result = await translateText({
           text: chunks[i],
           sourceLang,
           targetLang,
-          settings,
+          settings: {
+            ...settings.translation_settings,
+            provider: settings.api_settings
+          },
         });
         results.push(result);
         set({ translationProgress: Math.round(((i + 1) / chunks.length) * 100) });
       }
 
-      set({ translatedText: results.join('\n') });
+      const translatedText = results.join('\n');
+      set({ translatedText });
+      
+      // 保存翻译历史
+      await useHistoryStore.getState().addHistory({
+        source_text: sourceText,
+        translated_text: translatedText,
+        source_lang: sourceLang,
+        target_lang: targetLang,
+        template_id: useTemplateStore.getState().selectedTemplate?.id
+      });
+
       toast.success(t('success.translateSuccess'));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('errors.translateFailed'));
@@ -148,16 +151,6 @@ const useStore = create<Store>((set, get) => ({
       set({ isTranslating: false, translationProgress: 0 });
     }
   },
-
-  settings: defaultSettings,
-  updateSettings: (newSettings: TranslationSettings) => set({ settings: newSettings }),
-
-  settingsState: {
-    isOpen: false,
-    activeTab: 'provider'
-  },
-  openSettings: () => set({ settingsState: { isOpen: true, activeTab: 'provider' } }),
-  closeSettings: () => set({ settingsState: { isOpen: false, activeTab: 'provider' } }),
 
   uploadFile: async () => {
     const t = getT();
@@ -183,7 +176,8 @@ const useStore = create<Store>((set, get) => ({
 
   downloadFile: () => {
     const t = getT();
-    const { translatedText, settings } = get();
+    const { translatedText } = get();
+    const settings = useSettingsStore.getState().settings;
     
     if (!translatedText.trim()) {
       toast.error(t('errors.downloadFailed'));
@@ -194,7 +188,7 @@ const useStore = create<Store>((set, get) => ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${settings.downloadFilePrefix}${new Date().getTime()}.tex`;
+    a.download = `${settings?.translation_settings.downloadFilePrefix || 'translated_'}${new Date().getTime()}.tex`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -209,7 +203,7 @@ const useStore = create<Store>((set, get) => ({
       toast.error(t('errors.saveFailed'));
       return;
     }
-    // Implement save functionality
+    // 实现保存功能
   },
 
   copyToClipboard: () => {
@@ -226,11 +220,12 @@ const useStore = create<Store>((set, get) => ({
       .catch(() => toast.error(t('errors.copyFailed')));
   },
 
+  // 国际化
   i18n: {
     currentLanguage: i18n.language,
     isChangingLanguage: false,
   },
-
+  
   setLanguage: async (lang: string) => {
     const t = getT();
     try {
@@ -243,9 +238,6 @@ const useStore = create<Store>((set, get) => ({
       throw error;
     }
   },
-
-  translationProgress: 0,
-  setTranslationProgress: (progress: number) => set({ translationProgress: progress }),
 }));
 
 export default useStore;

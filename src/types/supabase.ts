@@ -21,6 +21,11 @@ export interface Database {
             apiKey: string
             apiUrl: string
             model: string
+            models: Array<{
+              id: string
+              name: string
+              isBuiltIn?: boolean
+            }>
           }
           translation_settings: {
             maxConcurrentRequests: number
@@ -29,25 +34,29 @@ export interface Database {
             defaultSourceLang: string
             defaultTargetLang: string
             temperature: number
+            renderLatex: boolean
           }
           created_at: string
           updated_at: string
+          selected_template_id: string | null
         }
         Insert: {
           id?: string
           user_id: string
-          display_name?: string
+          display_name?: string | null
           interface_language?: string
           theme?: string
           api_settings?: Record<string, any>
           translation_settings?: Record<string, any>
+          selected_template_id?: string | null
         }
         Update: {
-          display_name?: string
+          display_name?: string | null
           interface_language?: string
           theme?: string
           api_settings?: Record<string, any>
           translation_settings?: Record<string, any>
+          selected_template_id?: string | null
         }
       }
       translation_templates: {

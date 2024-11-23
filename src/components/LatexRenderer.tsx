@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import useStore from '../store';
+import useStore from '../store/index';
 
 interface LatexRendererProps {
   content: string;

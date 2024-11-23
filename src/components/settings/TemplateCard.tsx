@@ -28,19 +28,21 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
 
   return (
     <div
-      draggable={!template.isBuiltIn}
-      onDragStart={(e) => onDragStart?.(e, template)}
+      draggable={!template.is_built_in}
+      onDragStart={(e) => !template.is_built_in && onDragStart?.(e, template)}
       onDragOver={(e) => onDragOver?.(e, template.id)}
       onDrop={onDrop}
       className={`group relative rounded-xl border transition-all duration-200 h-[200px] flex flex-col ${
         isSelected
           ? 'border-indigo-500 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/30'
           : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-lg dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600'
+      } ${
+        template.is_built_in ? 'cursor-not-allowed opacity-75' : 'cursor-grab'
       }`}
     >
       <div className="flex-1 p-4 sm:p-5 overflow-hidden">
         <div className="flex items-start gap-3">
-          {!template.isBuiltIn && (
+          {!template.is_built_in && (
             <GripVertical className="h-5 w-5 text-gray-400 cursor-move flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
           )}
           <div className="flex-1 min-w-0">
@@ -82,7 +84,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
             <Check className="h-3 w-3" />
           </div>
         </button>
-        {!template.isBuiltIn && (
+        {!template.is_built_in && (
           <>
             <button
               onClick={() => onEdit(template)}

@@ -15,11 +15,11 @@ const AuthPage: React.FC = () => {
   const { setUser } = useAuthStore();
 
   useEffect(() => {
-    // 监听认证状态变化
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           setUser(session.user);
+          await Promise.resolve();
           const from = (location.state as any)?.from?.pathname || '/';
           navigate(from, { replace: true });
         }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Globe } from 'lucide-react';
-import useStore from '../store';
+import useStore from '../store/index';
 import { toast } from 'react-toastify';
 import Select from './common/Select';
 

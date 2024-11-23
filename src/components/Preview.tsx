@@ -1,5 +1,5 @@
 import React from 'react';
-import useStore from '../store';
+import useStore from '../store/index';
 import LatexRenderer from './LatexRenderer';
 import { AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';

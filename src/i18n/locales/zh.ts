@@ -1,8 +1,9 @@
 export default {
   common: {
     upload: '上传',
-    download: '下载',
+    download: '下载', 
     save: '保存',
+    copy: '复制',
     settings: '设置',
     translate: '翻译',
     translating: '正在翻译...',
@@ -20,8 +21,12 @@ export default {
     lightMode: '浅色模式',
     appTitle: 'LaTeX 翻译器',
     cancel: '取消',
+    reset: '重置',
+    apply: '应用',
     add: '添加',
     remove: '移除',
+    swapLanguages: '切换语言',
+    close: '关闭',
     languageChange: {
       pending: '正在切换语言...',
       success: '语言切换成功',
@@ -30,7 +35,11 @@ export default {
     },
     select: '选择',
     edit: '编辑',
-    delete: '删除',
+    delete: '删除'
+  },
+  auth: {
+    title: '登录',
+    retrying: '正在重试登录...'
   },
   settings: {
     provider: {
@@ -41,6 +50,9 @@ export default {
       urlPlaceholder: '例如: https://api.example.com/v1',
       model: '模型',
       modelPlaceholder: '例如: gpt-3.5-turbo',
+      modelId: '模型ID',
+      modelName: '模型名称',
+      models: '可用模型'
     },
     prompt: {
       title: '提示设置',
@@ -63,7 +75,7 @@ export default {
       templates: '模板列表',
       placeholder: '请输入提示词...',
       tagInputTip: '使用逗号或回车键分隔多个标签',
-      noTags: '暂无标签',
+      noTags: '暂无标签'
     },
     other: {
       title: '其他设置',
@@ -80,8 +92,8 @@ export default {
       temperature: '温度',
       temperatureDesc: '生成文本的随机性（0-2）',
       defaultApiUrl: '默认 API URL',
-      downloadFilePrefix: '下载文件前缀',
-    },
+      downloadFilePrefix: '下载文件前缀'
+    }
   },
   errors: {
     uploadFailed: '文件上传失败',
@@ -91,7 +103,7 @@ export default {
     apiConfigRequired: '请先配置 API 设置',
     emptyContent: '请输入需要翻译的内容',
     renderError: 'LaTeX 渲染错误',
-    noContentToCopy: '没���可复制的内容',
+    noContentToCopy: '没可复制的内容',
     copyFailed: '复制失败',
     i18nInitFailed: '初始化翻译失败',
     i18nChangeFailed: '语言切换失败',
@@ -99,6 +111,9 @@ export default {
     templateContentRequired: '模板内容不能为空',
     duplicateTag: '标签已存在',
     invalidTag: '无效的标签',
+    cannotReorderBuiltIn: '内建模板无法改变顺序',
+    updateSettingsFailed: '更新设置失败',
+    saveTemplateFailed: '保存模板失败'
   },
   success: {
     uploadSuccess: '文件上传成功',
@@ -106,5 +121,5 @@ export default {
     copySuccess: '复制成功',
     templateSaved: '模板保存成功',
     templateDeleted: '模板删除成功'
-  },
+  }
 };
