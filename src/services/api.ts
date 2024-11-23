@@ -14,7 +14,10 @@ export const translateText = async ({
   targetLang, 
   settings 
 }: TranslationRequest) => {
-  const { provider, systemPrompt } = settings;
+  const { provider } = settings;
+  
+  const selectedTemplate = settings.templates?.find(t => t.id === settings.selected_template_id);
+  const systemPrompt = selectedTemplate?.content || '';
   
   try {
     const api = axios.create({
@@ -39,13 +42,13 @@ export const translateText = async ({
           content: text
         }
       ],
-      temperature: 0.3,
+      temperature: settings.temperature || 0.3,
     });
 
     return response.data.choices[0].message.content;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.error?.message || 'Translation failed');
+      throw new Error(error.response?.data?.error?.message || '翻译失败');
     }
     throw error;
   }
