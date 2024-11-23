@@ -1,143 +1,88 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import axios from 'axios';
-import { AuthStore, LoginInput, RegisterInput, ResetPasswordInput, User } from '../types/auth';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import { toast } from 'react-toastify';
 
-const api = axios.create({
-  baseURL: '/api/auth',
-  withCredentials: true,
-});
+interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+}
 
-export const useAuthStore = create<AuthStore>()(
-  persist(
-    (set) => ({
-      user: null,
-      isAuthenticated: false,
-      isLoading: false,
-      token: null,
+const useAuthStore = create<AuthState>((set) => ({
+  user: null,
+  isLoading: false,
 
-      login: async (credentials: LoginInput) => {
-        try {
-          set({ isLoading: true });
-          const { data } = await api.post('/login', credentials);
-          set({
-            user: data.user,
-            token: data.token,
-            isAuthenticated: true,
-          });
-          toast.success('Successfully logged in');
-        } catch (error) {
-          toast.error('Invalid credentials');
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      register: async (data: RegisterInput) => {
-        try {
-          set({ isLoading: true });
-          await api.post('/register', data);
-          toast.success('Registration successful. Please check your email to verify your account.');
-        } catch (error) {
-          toast.error('Registration failed');
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      logout: async () => {
-        try {
-          set({ isLoading: true });
-          await api.post('/logout');
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-          });
-          toast.success('Successfully logged out');
-        } catch (error) {
-          toast.error('Logout failed');
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      forgotPassword: async (email: string) => {
-        try {
-          set({ isLoading: true });
-          await api.post('/forgot-password', { email });
-          toast.success('Password reset instructions sent to your email');
-        } catch (error) {
-          toast.error('Failed to send reset instructions');
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      resetPassword: async (data: ResetPasswordInput) => {
-        try {
-          set({ isLoading: true });
-          await api.post('/reset-password', data);
-          toast.success('Password successfully reset');
-        } catch (error) {
-          toast.error('Failed to reset password');
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-
-      verifyEmail: async (token: string) => {
-        try {
-          set({ isLoading: true });
-          const { data } = await api.post('/verify-email', { token });
-          set({
-            user: data.user,
-            isAuthenticated: true,
-          });
-          toast.success('Email successfully verified');
-        } catch (error) {
-          toast.error('Failed to verify email');
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-    }),
-    {
-      name: 'auth-storage',
-      partialize: (state) => ({
-        token: state.token,
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+  signIn: async (email: string, password: string) => {
+    try {
+      set({ isLoading: true });
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      toast.success('Successfully signed in');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to sign in');
+      throw error;
+    } finally {
+      set({ isLoading: false });
     }
-  )
-);
+  },
 
-// Axios interceptor for adding auth token
-api.interceptors.request.use((config) => {
-  const token = useAuthStore.getState().token;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
-// Axios interceptor for handling 401 responses
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
+  signUp: async (email: string, password: string) => {
+    try {
+      set({ isLoading: true });
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
+      if (error) throw error;
+      toast.success('Check your email to confirm your account');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to sign up');
+      throw error;
+    } finally {
+      set({ isLoading: false });
     }
-    return Promise.reject(error);
-  }
-);
+  },
+
+  signOut: async () => {
+    try {
+      set({ isLoading: true });
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      set({ user: null });
+      toast.success('Successfully signed out');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to sign out');
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  resetPassword: async (email: string) => {
+    try {
+      set({ isLoading: true });
+      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      toast.success('Password reset instructions sent to your email');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to send reset instructions');
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+}));
+
+// Set up auth state listener
+supabase.auth.onAuthStateChange((event, session) => {
+  useAuthStore.setState({ user: session?.user || null });
+});
 
 export default useAuthStore;
