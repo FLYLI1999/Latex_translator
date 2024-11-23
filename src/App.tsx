@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n/config';
-import { Github, Settings, BookOpen, Save, Download, Upload, Clipboard } from 'lucide-react';
+import { Github, Settings, BookOpen, Save, Download, Upload, Clipboard, Clock } from 'lucide-react';
 import { ToastContainer } from 'react-toastify';
 import useStore from './store/index';
 import AuthPage from './components/auth/AuthPage';
@@ -16,9 +16,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import useAuthStore from './store/auth';
 import { useSettingsStore } from './store/settings';
 import { useTemplateStore } from './store/templates';
+import HistoryDialog from './components/history/HistoryDialog';
 
 function App() {
-  const { darkMode, openSettings, uploadFile, downloadFile, saveFile, copyToClipboard, isSettingsOpen } = useStore();
+  const { darkMode, openSettings, uploadFile, downloadFile, saveFile, copyToClipboard, isSettingsOpen, isHistoryOpen, openHistory, closeHistory } = useStore();
   const { checkAuth, isAuthenticated } = useAuthStore();
   const { fetchSettings } = useSettingsStore();
   const { fetchTemplates } = useTemplateStore();
@@ -92,6 +93,13 @@ function App() {
                             >
                               <Settings className="h-5 w-5" />
                             </button>
+                            <button 
+                              onClick={openHistory}
+                              className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+                              title={i18n.t('common.history')}
+                            >
+                              <Clock className="h-5 w-5" />
+                            </button>
                             <a
                               href="https://github.com"
                               target="_blank"
@@ -115,6 +123,7 @@ function App() {
                       </div>
                     </main>
                     {isSettingsOpen && <SettingsDialog />}
+                    {isHistoryOpen && <HistoryDialog onClose={closeHistory} />}
                   </div>
                 </ProtectedRoute>
               }

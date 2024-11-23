@@ -48,6 +48,11 @@ interface TranslationStore {
     isChangingLanguage: boolean;
   };
   setLanguage: (lang: string) => Promise<void>;
+  
+  // 历史记录
+  isHistoryOpen: boolean;
+  openHistory: () => void;
+  closeHistory: () => void;
 }
 
 const useStore = create<TranslationStore>((set, get) => ({
@@ -226,6 +231,11 @@ const useStore = create<TranslationStore>((set, get) => ({
       throw error;
     }
   },
+  
+  // 历史记录
+  isHistoryOpen: false,
+  openHistory: () => set({ isHistoryOpen: true }),
+  closeHistory: () => set({ isHistoryOpen: false }),
 }));
 
 export default useStore;

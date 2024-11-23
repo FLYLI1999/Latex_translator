@@ -3,6 +3,7 @@ import { historyService } from '../services/supabase/history';
 import { toast } from 'react-toastify';
 import type { Database } from '../types/supabase';
 import useAuthStore from './auth';
+import { handleSupabaseError } from '../utils/supabase-helper';
 
 type History = Database['public']['Tables']['translation_history']['Row'];
 type HistoryInsert = Database['public']['Tables']['translation_history']['Insert'];
@@ -14,6 +15,7 @@ interface HistoryStore {
   fetchHistory: (limit?: number) => Promise<void>;
   addHistory: (history: Omit<HistoryInsert, 'user_id'>) => Promise<void>;
   toggleFavorite: (id: string, isFavorite: boolean) => Promise<void>;
+  deleteHistory: (id: string) => Promise<void>;
 }
 
 export const useHistoryStore = create<HistoryStore>((set) => ({
@@ -21,7 +23,7 @@ export const useHistoryStore = create<HistoryStore>((set) => ({
   isLoading: false,
   error: null,
 
-  fetchHistory: async (limit = 20) => {
+  fetchHistory: async (limit = 50) => {
     const user = useAuthStore.getState().user;
     if (!user) return;
 
@@ -31,7 +33,7 @@ export const useHistoryStore = create<HistoryStore>((set) => ({
       set({ history });
     } catch (error) {
       set({ error: error as Error });
-      toast.error('加载历史记录失败');
+      handleSupabaseError(error as Error, '加载历史记录失败');
     } finally {
       set({ isLoading: false });
     }
@@ -52,7 +54,7 @@ export const useHistoryStore = create<HistoryStore>((set) => ({
       }));
     } catch (error) {
       set({ error: error as Error });
-      toast.error('保存历史记录失败');
+      handleSupabaseError(error as Error, '保存历史记录失败');
     } finally {
       set({ isLoading: false });
     }
@@ -67,7 +69,23 @@ export const useHistoryStore = create<HistoryStore>((set) => ({
       }));
     } catch (error) {
       set({ error: error as Error });
-      toast.error('更新收藏状态失败');
+      handleSupabaseError(error as Error, '更新收藏状态失败');
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  deleteHistory: async (id) => {
+    set({ isLoading: true, error: null });
+    try {
+      await historyService.deleteHistory(id);
+      set(state => ({
+        history: state.history.filter(h => h.id !== id)
+      }));
+      toast.success('已删除历史记录');
+    } catch (error) {
+      set({ error: error as Error });
+      handleSupabaseError(error as Error, '删除历史记录失败');
     } finally {
       set({ isLoading: false });
     }
