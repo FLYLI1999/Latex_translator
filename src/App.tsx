@@ -4,11 +4,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './i18n/config';
 import { ToastContainer } from 'react-toastify';
 import useStore from './store';
-import LoginForm from './components/auth/LoginForm';
-import RegisterForm from './components/auth/RegisterForm';
-import ForgotPasswordForm from './components/auth/ForgotPasswordForm';
-import ResetPasswordForm from './components/auth/ResetPasswordForm';
-import VerifyEmail from './components/auth/VerifyEmail';
+import AuthPage from './components/auth/AuthPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Editor from './components/Editor';
 import Preview from './components/Preview';
@@ -30,11 +26,7 @@ function App() {
             autoClose={3000}
           />
           <Routes>
-            <Route path="/login" element={<LoginForm />} />
-            <Route path="/register" element={<RegisterForm />} />
-            <Route path="/forgot-password" element={<ForgotPasswordForm />} />
-            <Route path="/reset-password" element={<ResetPasswordForm />} />
-            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/auth" element={<AuthPage />} />
             <Route
               path="/"
               element={
